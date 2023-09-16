@@ -1,0 +1,159 @@
+/*  CSS font google offline */
+@import url('./../fonts/Nunito-fonts.css');
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    text-transform: capitalize; /* viết hoa chữ cái đầu mỗi chữ */
+    transition: all 0.2s linear;
+}
+*::selection {
+    background-color: #333;
+    color: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline-width: 0;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+input {
+    line-height: normal;
+}
+label,
+button {
+    cursor: pointer;
+}
+a {
+    text-decoration: none;
+}
+
+/*------------------------
+        TẠO BIẾN
+------------------------*/
+:root {
+    --black: #0b0b11;
+    --light-color: #515151;
+
+    --border: 0.15rem solid rgba(0, 0, 0, 0.7);
+    --box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+
+    --zIndexBgImg: -1;
+}
+
+html {
+    font-family: 'Nunito', sans-serif;
+    font-size: 62.5%;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--outline-spacing);
+}
+
+body {
+    min-height: 100vh;
+    font-size: 1.6rem;
+    color: rgb(22, 22, 22);
+    opacity: 1;
+}
+
+/* ============================= */
+.login-section {
+    display: block;
+    position: relative;
+}
+.login-section::before {
+    content: '';
+    background-image: url('./../img/background-login.jpg');
+    background-size: cover;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--zIndexBgImg);
+}
+.login-section::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--zIndexBgImg);
+    background-color: rgba(0, 0, 0, 0.6); /* Điều chỉnh mức độ đục mờ ở đây */
+}
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container .form-login {
+    width: 40rem;
+    background-color: #eaeded;
+    padding: 2rem;
+    border: 2px solid #4e8cff;
+    border-radius: 2rem;
+    box-shadow: var(--box-shadow);
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+}
+.form-login .form-group {
+    position: relative;
+    width: 100%;
+}
+.form-login .form-group input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.7rem;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+}
+.form-login .form-group input:focus {
+    outline: none;
+    border-color: #4e8cff;
+    box-shadow: 0 0 5px #4e8cff;
+}
+.form-login .form-group i.show-pass-icon {
+    position: absolute;
+    bottom: 1.4rem;
+    right: 1rem;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* nút login */
+.form-submit {
+    width: 100%;
+    text-align: center;
+}
+.btn-login {
+    border: 2px solid #4e8cff;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4e8cff;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-login:hover {
+    background-color: #356ed5;
+}
