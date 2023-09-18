@@ -6,14 +6,16 @@
  *   - CustomRules::class, (để đăng kí quy tắc mới chạy đc hàm validation->run)
  */
 
-namespace App\CustomValidators;
+namespace App\CustomValidators\Models;
 
-use CodeIgniter\HTTP\RequestInterface;
-use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Validation\Rules;
 
 class CustomRules extends Rules
 {
+
+    /**
+     * Quy tắc chấp nhận tên tiếng việt
+     */
     public function rule_name_unicode(string $str, string &$error = null): bool
     {
         $unicodePattern = '/^[\p{L}\p{N}\s]+$/u';

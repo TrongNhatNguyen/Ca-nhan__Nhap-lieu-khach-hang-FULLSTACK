@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class KhachhangModel extends Model
 {
-    protected $table      = 'khachhangs';  // Tên table
+    protected $table      = 'khachhangs';  // `app\Database\Migrations\Admin\2023-08-27-175056_CreateKhachhangsTable.php`
     protected $primaryKey = 'id';         // Khóa chính
 
     protected $returnType = 'array';     // Kiểu dữ liệu trả về, bạn cũng có thể sử dụng 'object'
@@ -24,8 +24,17 @@ class KhachhangModel extends Model
     protected $skipValidation     = false; // Có bỏ qua quá trình xác thực hay không
 
     // =================================================================
+    protected $validation;
+    function __construct()
+    {
+        parent::__construct(); // hàm này cho phép viết câu truy vấn ở controller
 
-    /**
+        // nạp thư viện kiểm tra Quy tắc:
+        $this->validation = \Config\Services::validation();
+    }
+
+
+    /**------------------------------
      * Lấy danh sách khách hàng
      */
     public function getKhachhangs($where = [], $fields = '*', $orderBy = 'id DESC', $limit = 10, $offset = 0)
@@ -34,8 +43,18 @@ class KhachhangModel extends Model
         return $this->findAll($limit, $offset);
     }
 
-    /**
-     * Đếm tất cả bản ghi
+
+    /**------------------------------
+     * Tìm khách hàng bằng ID
+     */
+    public function getByID($id)
+    {
+        return $this->find($id);
+    }
+
+
+    /**------------------------------
+     * Đếm tổng số bản ghi
      */
     public function countTotal($where = [], $search = [])
     {
@@ -48,5 +67,28 @@ class KhachhangModel extends Model
         return $this->countAllResults();
     }
 
-    // Bạn cũng có thể thêm các phương thức tùy chỉnh khác cho các truy vấn đặc biệt
+
+    /**------------------------------
+     * Thêm mới khách hàng
+     */
+    public function themMoiKhachHang($data)
+    {
+        return $this->insert($data);
+    }
+
+    /**------------------------------
+     * Cập nhật khách hàng
+     */
+    public function capNhatKhachHang($id, $data)
+    {
+        return $this->update($id, $data);
+    }
+
+    /**------------------------------
+     * Xoá bỏ khách hàng
+     */
+    public function xoaKhachHang($id)
+    {
+        return $this->delete($id);
+    }
 }

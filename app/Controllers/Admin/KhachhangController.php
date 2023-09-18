@@ -30,23 +30,15 @@ class KhachhangController extends BaseController
     }
 
 
+    /**-------------------------------
+     *  Hàm Trang chủ (index)
+     */
     public function index()
     {
         $page = intval($this->request->getGet('page', FILTER_VALIDATE_INT))
             ?: intval($this->request->getPost('page', FILTER_VALIDATE_INT));
-        $page = max(1, $page);
 
-        $data  = [];
-        $limit = 5;
-        $dieukien = []; // $dieukien = ['status' => 'active'];
-
-        $total        = $this->khachhangModel->countTotal($dieukien);
-        $dsKhachhangs = $this->khachhangModel->where($dieukien)->paginate($limit);
-
-        $data = [
-            'dsKhachhangs' => $this->napSttDateTime($dsKhachhangs, $total, $page),
-            'pager'        => $this->khachhangModel->pager->links(template: 'khachhang_pager')
-        ];
+        $data = $this->dsPhanTrang(page: $page);
 
         // khai báo 2 dòng này để dùng được: <?= $this->extend,section,.. ?.> ở Views
         $view = $this->services->renderer(APPPATH . 'views/admin/pages/', null, false);
@@ -55,7 +47,7 @@ class KhachhangController extends BaseController
 
 
     /**-------------------------------
-     * Hàm Tìm kiếm khách hàng
+     *  Hàm Tìm kiếm khách hàng
      */
     public function timkiemKhachhang()
     {
@@ -88,35 +80,159 @@ class KhachhangController extends BaseController
     }
 
 
+    /**-------------------------------
+     *  Thêm Khách hàng mới
+     */
+    public function themMoi()
+    {
+        // Dữ liệu từ form
+        $data = [
+            'name'   => $this->request->getPost('name'),
+            'phone'  => $this->request->getPost('phone'),
+            'points' => $this->request->getPost('points'),
+            'status' => 'active',
+        ];
+
+        $result = $this->khachhangModel->themMoiKhachHang($data);
+
+        if ($result) {
+            $resData = ['status' => 'success', 'mess' => 'Thêm mới thành công!'];
+        } else {
+            $resData = ['status' => 'errors', 'mess' => $this->khachhangModel->errors()];
+        }
+
+        $resData += $this->dsPhanTrang(page: 1);
+
+        return $this->response->setJSON($resData, 200);
+    }
+
+    /**-------------------------------
+     *  Hiển thị khách hàng muốn Sửa
+     */
+    public function showCapNhat()
+    {
+        $id        = $this->request->getGet('idKh');
+        $khachhang = $this->khachhangModel->getByID($id);
+
+        if ($khachhang) {
+            $resData = ['status' => 'success', 'khachhang' => $khachhang];
+        } else {
+            $resData = ['status' => 'errors', 'mess' => 'không tồn tại.'];
+        }
+
+        return $this->response->setJSON($resData, 200);
+    }
+
+    /**-----------------------------------
+     * Xử lý cập nhật khách hàng muốn sửa
+     */
+    public function xulyCapNhat()
+    {
+        // Dữ liệu từ form
+        $id   = $this->request->getPost('id_kh');
+        $data = [
+            'name'   => $this->request->getPost('name'),
+            'phone'  => $this->request->getPost('phone'),
+            'points' => $this->request->getPost('points'),
+        ];
+
+        $result = $this->khachhangModel->capNhatKhachHang($id, $data);
+
+        if ($result) {
+            $resData = ['status' => 'success', 'mess' => 'Cập nhật thành công!'];
+        } else {
+            $resData = ['status' => 'errors', 'mess' => $this->khachhangModel->errors()];
+        }
+
+        $page = intval($this->request->getGet('page', FILTER_VALIDATE_INT))
+            ?: intval($this->request->getPost('page', FILTER_VALIDATE_INT));
+
+        $resData += $this->dsPhanTrang(page: $page);
+
+        return $this->response->setJSON($resData, 200);
+    }
+
+    /**-----------------------------------
+     *  Xoá bỏ khách hàng
+     */
+    public function xoa()
+    {
+        $id     = $this->request->getGet('idKh');
+        $result = $this->khachhangModel->xoaKhachHang($id);
+
+        if ($result) {
+            $resData = ['status' => 'success', 'mess' => 'Xoá thành công!'];
+        } else {
+            $resData = ['status' => 'errors', 'mess' => $this->khachhangModel->errors()];
+        }
+
+        $page = intval($this->request->getGet('page', FILTER_VALIDATE_INT))
+            ?: intval($this->request->getPost('page', FILTER_VALIDATE_INT));
+
+        $resData += $this->dsPhanTrang(page: $page);
+
+        return $this->response->setJSON($resData, 200);
+    }
+
 
     /**------------------------------
-     * Hàm nạp thêm STT, Date, Time
+     *  Hàm Phân trang ds khách hàng
      */
-    public function napSttDateTime($dsKhachhangs, $total, $page = 1, $limit = 5)
+    public function dsPhanTrang($page, $limit = 5, $fields = '*', $dieukien = [], $orderBy = 'id DESC')
     {
-        if (!empty($dsKhachhangs)) {
-            // vị trí bắt đầu lấy bản ghi theo paginate:
-            $offset = max(0, ($page - 1) * $limit);
+        $page = max(1, $page);
+        $data  = [];
+        // $dieukien += ['status' => 'active'];
 
-            // Đếm số thứ tự các bản ghi:
-            $remainingRecords = $total - $offset;
-            $stt = $remainingRecords;
+        $total        = $this->khachhangModel->countTotal($dieukien);
+        $dsKhachhangs = $this->khachhangModel->select($fields)
+            ->where($dieukien)->orderBy($orderBy)->paginate(perPage: $limit, page: $page);
 
-            foreach ($dsKhachhangs as &$item) {
-                $createdAt = $item['created_at'] ?? null;
+        $data = [
+            'dsKhachhangs' => $this->napSttDateTime($dsKhachhangs, $total, $page),
+            'pager'        => $this->khachhangModel->pager->links(template: 'khachhang_pager')
+        ];
 
-                if ($createdAt) {
-                    // Gán giá trị stt cho mỗi khách hàng
-                    $item['stt'] = $stt--;
+        return $data;
+    }
 
-                    // Phân tách ngày, giờ trong `created_at`
-                    $item['created_date'] = $this->time::parse($createdAt)->format('d-m-Y');
-                    $item['created_time'] = $this->time::parse($createdAt)->toTimeString();
-                }
+
+    /**------------------------------
+     *  Hàm nạp thêm STT, Date, Time
+     */
+    public function napSttDateTime(array $dsKhachhangs, int $total, int $page = 1, int $limit = 5): array
+    {
+        // nếu không có bản ghi nào hoặc tổng số bản ghi là 0, trả về danh sách rỗng
+        if (!$dsKhachhangs || $total <= 0) {
+            return [];
+        }
+
+        // kiểm tra nếu xoá hết bản ghi của pager cuối cùng thì tự động lùi về pager kế cuối
+        while (($page - 1) * $limit >= $total && $page > 1) {
+            $page--;
+        }
+
+        // vị trí bắt đầu lấy bản ghi theo paginate:
+        $offset = ($page - 1) * $limit;
+
+        // Đếm số thứ tự các bản ghi:
+        $stt = $total - $offset;
+
+        foreach ($dsKhachhangs as &$item) {
+            // Gán giá trị stt cho mỗi khách hàng
+            $item['stt'] = $stt--;
+
+            // Phân tách ngày, giờ từ `created_at` nếu có
+            if (isset($item['created_at'])) {
+                $createdAt = $this->time::parse($item['created_at']);
+                $item['created_date'] = $createdAt->format('d-m-Y');
+                $item['created_time'] = $createdAt->toTimeString();
             }
         }
+
         return $dsKhachhangs;
     }
+
 
 
 

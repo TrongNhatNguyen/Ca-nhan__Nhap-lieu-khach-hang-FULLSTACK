@@ -20,20 +20,22 @@
                     $('.khachhang-form-spinner').fadeIn();
                 },
                 success: function(response) {
+                    var khachhang = response.khachhang;
+                    khachhang
                     // NẠP DL VÀO FORM HIỂN THỊ
                     var form = $('.form-khachhang');
-                    form.siblings('h3').text('SỬA KHÁCH HÀNG #' + response.id); // thay đổi tiêu đề h3 nằm cùng cấp vs form
-                    form.attr('action', '<?= base_url() . route_to('khachhang.xuly_capnhat') ?>');
+                    form.siblings('h3').text('SỬA KHÁCH HÀNG #' + khachhang.id); // thay đổi tiêu đề h3 nằm cùng cấp vs form
+                    form.attr('action', '<?php echo base_url(route_to('khachhang.xuly_capnhat')); ?>');
                     form.attr('status', 'update');
-                    form.find('input[name="id_kh"]').val(response.id);
-                    form.find('input[name="name"]').val(response.name);
-                    form.find('input[name="phone"]').val(response.phone);
-                    form.find('input[name="points"]').val(response.points);
+                    form.find('input[name="id_kh"]').val(khachhang.id);
+                    form.find('input[name="name"]').val(khachhang.name);
+                    form.find('input[name="phone"]').val(khachhang.phone);
+                    form.find('input[name="points"]').val(khachhang.points);
                     form.find('input[type="submit"]').val('Sửa ngay');
 
                     // HIGHLIGHT Dòng <tr> đang sửa ở table
                     $('.table-list').find('tbody tr').removeClass('highlighted-row');
-                    var highlightRow = $('.table-list').find('tbody #' + response.id);
+                    var highlightRow = $('.table-list').find('tbody #' + khachhang.id);
                     highlightRow.toggleClass('highlighted-row');
                 },
                 error: function(xhr, status, error) {
