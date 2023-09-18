@@ -9,33 +9,21 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\Admin\KhachhangModel;
 use CodeIgniter\Config\Services;
+use CodeIgniter\I18n\Time;
 
 class KhachhangController extends BaseController
 {
-    protected $session;
-    protected $mRequest;
-    protected $email;
-    protected $currentTime;
     protected $services;
-    protected $pager;
+    protected $time;
     protected $khachhangModel;
 
-    function __construct()
+    public function __construct()
     {
         // Chuyển hướng về view (extend, section,..)
         $this->services = new Services();
 
-        // Khai báo session lưu trữ:
-        $this->session = \Config\Services::session();
-
-        // Hỗ trợ nhận request từ form truyền vào:
-        $this->request = \Config\Services::request();
-
-        // Cấu hình gửi mail:
-        $this->email = \Config\Services::email();
-
-        // phân trang paginate:
-        $this->pager = \Config\Services::pager();
+        // Nạp hàm lấy hoặc format thời gian:
+        $this->time = new Time();
 
         // Nạp dl vào database cần tạo Model:
         $this->khachhangModel = new KhachhangModel();
@@ -44,8 +32,21 @@ class KhachhangController extends BaseController
 
     public function index()
     {
-        // Phân trang và pager_link giao diện:
-        $data = $this->custom_paginate_link();
+        $page = intval($this->request->getGet('page', FILTER_VALIDATE_INT))
+            ?: intval($this->request->getPost('page', FILTER_VALIDATE_INT));
+        $page = max(1, $page);
+
+        $data  = [];
+        $limit = 5;
+        $dieukien = []; // $dieukien = ['status' => 'active'];
+
+        $total        = $this->khachhangModel->countTotal($dieukien);
+        $dsKhachhangs = $this->khachhangModel->where($dieukien)->paginate($limit);
+
+        $data = [
+            'dsKhachhangs' => $this->napSttDateTime($dsKhachhangs, $total, $page),
+            'pager'        => $this->khachhangModel->pager->links(template: 'khachhang_pager')
+        ];
 
         // khai báo 2 dòng này để dùng được: <?= $this->extend,section,.. ?.> ở Views
         $view = $this->services->renderer(APPPATH . 'views/admin/pages/', null, false);
@@ -53,138 +54,91 @@ class KhachhangController extends BaseController
     }
 
 
-    public function searchCustomer()
+    /**-------------------------------
+     * Hàm Tìm kiếm khách hàng
+     */
+    public function timkiemKhachhang()
     {
-        $data = [];
+        $keywords    = $this->request->getVar('search');
+        $fieldSearch = $this->determineSearchField($keywords);
 
-        // Kiểm tra từ khoá:
-        $keywords = $this->request->getVar('search');
-        $fieldSearch = null;
+        $page = intval($this->request->getGet('page_search', FILTER_VALIDATE_INT))
+            ?: intval($this->request->getPost('page_search', FILTER_VALIDATE_INT));
+        $page = max(1, $page);
 
-        if (empty($keywords)) {
-            // Nạp Phân trang và pager_link giao diện:
-            $data = $this->custom_paginate_link();
-            return $this->response->setJSON($data, 200);
+        $data  = [];
+        $limit = 5;
+        $dieukien = []; // $dieukien = ['status' => 'active'];
+        $search = $fieldSearch ? [$fieldSearch, $keywords] : [];
+
+        $query = $this->khachhangModel->where($dieukien);
+        if ($fieldSearch) {
+            $query = $query->like($search[0], $search[1]);
         }
 
-        // Xác định field tìm kiếm dựa trên định dạng của từ khóa
-        if (preg_match('/^(0|(\+84))[1-9][0-9]{0,10}$/', $keywords)) {
-            $fieldSearch = 'phone';
-        } elseif (preg_match('/^\d+$/', $keywords)) {
-            $fieldSearch = 'points';
-        } elseif (preg_match('/^[\p{L}\p{N}\s]+$/u', $keywords)) {
-            $fieldSearch = 'name';
-        }
+        $dsKhachhangs = $query->paginate($limit);
+        $total        = $this->khachhangModel->countTotal($dieukien, $search);
 
-        // Thực hiện tìm kiếm và paginate nếu xác định được field tìm kiếm
-        if ($fieldSearch !== null) {
-            $currentPage = 1;
-            $numRecords  = 20;
-
-            $results = $this->khachhangModel->search($keywords, $fieldSearch, limit: $numRecords, page: $currentPage);
-            $totalCount = $results['totalCount'] ?? 0;
-
-            // Nạp bản ghi & paginate_link (app/config/pager.php):
-            $data['pager_links'] = $this->pager->makeLinks($currentPage, $numRecords, $totalCount, 'my_custom_pager');
-            $data['khachhangs']  = $results['khachhangs'];
-        }
+        $data = [
+            'dsKhachhangs' => $this->napSttDateTime($dsKhachhangs, $total, $page),
+            'pager'        => $query->pager->links(template: 'khachhang_pager')
+        ];
 
         return $this->response->setJSON($data, 200);
     }
 
 
 
-    public function addNewCustomer()
+    /**------------------------------
+     * Hàm nạp thêm STT, Date, Time
+     */
+    public function napSttDateTime($dsKhachhangs, $total, $page = 1, $limit = 5)
     {
-        $name       = $this->request->getVar('name');
-        $phone      = $this->request->getVar('phone');
-        $points     = $this->request->getVar('points');
-        $status     = 'active';
+        if (!empty($dsKhachhangs)) {
+            // vị trí bắt đầu lấy bản ghi theo paginate:
+            $offset = max(0, ($page - 1) * $limit);
 
-        $result = $this->khachhangModel->addNew($name, $phone, $points, $status);
+            // Đếm số thứ tự các bản ghi:
+            $remainingRecords = $total - $offset;
+            $stt = $remainingRecords;
 
-        if ($result['status'] = 'success') {
-            // Nạp Phân trang và pager_link cho giao diện:
-            $data = $this->custom_paginate_link();
+            foreach ($dsKhachhangs as &$item) {
+                $createdAt = $item['created_at'] ?? null;
 
-            return $this->response->setJSON($data, 200);
+                if ($createdAt) {
+                    // Gán giá trị stt cho mỗi khách hàng
+                    $item['stt'] = $stt--;
+
+                    // Phân tách ngày, giờ trong `created_at`
+                    $item['created_date'] = $this->time::parse($createdAt)->format('d-m-Y');
+                    $item['created_time'] = $this->time::parse($createdAt)->toTimeString();
+                }
+            }
         }
-
-        return $this->response->setJSON($data, 400);
-    }
-
-
-    public function showUpdateCustomer()
-    {
-        $id = $this->request->getGet('idKh');
-        $khachhang = $this->khachhangModel->getByID($id);
-
-        if (!empty($khachhang)) {
-            return $this->response->setJSON($khachhang, 200);
-        }
-
-        return $this->response->setJSON('khong co ban ghi nao!', 400);
-    }
-
-
-    public function updateCustomer()
-    {
-        $idKh       = $this->request->getVar('id_kh');
-        $name       = $this->request->getVar('name');
-        $phone      = $this->request->getVar('phone');
-        $points     = (int) $this->request->getVar('points');
-
-        $result = $this->khachhangModel->updateCus($idKh, $name, $phone, $points);
-
-        if ($result['status'] = 'success') {
-            // Nạp Phân trang và pager_link cho giao diện:
-            $data = $this->custom_paginate_link();
-
-            return $this->response->setJSON($data, 200);
-        }
-
-        return $this->response->setJSON($result, 400);
-    }
-
-
-    public function deleteCustomer()
-    {
-        $idKh    = $this->request->getGet('idKh');
-        $removed = $this->khachhangModel->deleteCus($idKh);
-
-        if ($removed['status'] === 'success') {
-            // Nạp Phân trang và pager_link cho giao diện:
-            $data = $this->custom_paginate_link();
-
-            return $this->response->setJSON($data, 200);
-        } else {
-            return $this->response->setJSON($removed, 400);
-        }
+        return $dsKhachhangs;
     }
 
 
 
-    public function custom_paginate_link($numRecords = 5)
+    /**---------------------------------------------
+     * Hàm kiểm tra từ khoá phù hợp với field nào.
+     */
+    private function determineSearchField($keywords)
     {
-        $data = [];
-
-        // Lấy giá trị page từ giao diện
-        $currentPage = intval($this->request->getGet('page', FILTER_VALIDATE_INT)) ?: intval($this->request->getPost('page', FILTER_VALIDATE_INT));
-        $currentPage = max(1, $currentPage);
-
-        $results     = $this->khachhangModel->getAll(limit: $numRecords, page: $currentPage);
-        $totalCount  = $results['totalCount'] ?? 0;
-
-        // Kiểm tra nếu không có bản ghi nào
-        if (empty($results['khachhangs'])) {
-            $currentPage--;
-            $results = $this->khachhangModel->getAll(limit: $numRecords, page: $currentPage);
+        if (empty($keywords)) {
+            return null;
         }
 
-        // Nạp bản ghi & paginate_link (app/config/pager.php):
-        $data['pager_links'] = $this->pager->makeLinks($currentPage, $numRecords, $totalCount, 'my_custom_pager');
-        $data['khachhangs']  = $results['khachhangs'];
+        if (preg_match('/^(0|(\+84))[1-9][0-9]{0,10}$/', $keywords)) {
+            return 'phone';
+        }
+        if (preg_match('/^\d+$/', $keywords)) {
+            return 'points';
+        }
+        if (preg_match('/^[\p{L}\p{N}\s]+$/u', $keywords)) {
+            return 'name';
+        }
 
-        return $data;
+        return null;
     }
 }

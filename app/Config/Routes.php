@@ -37,17 +37,17 @@ $routes->get('/khach-hang', [\App\Controllers\Admin\KhachhangController::class, 
 $routes->addRedirect('/', '/khach-hang');
 
 // Tìm kiếm khách hàng:
-$routes->post('/khach-hang/tim-kiem', [\App\Controllers\Admin\KhachhangController::class, 'searchCustomer'], ['as' => 'khachhang.tim_kiem']);
+$routes->post('/khach-hang/tim-kiem', [\App\Controllers\Admin\KhachhangController::class, 'timkiemKhachhang'], ['as' => 'khachhang.tim_kiem']);
 
 // Thêm khách hàng mới
-$routes->post('/khach-hang/them-moi', [\App\Controllers\Admin\KhachhangController::class, 'addNewCustomer'], ['as' => 'khachhang.them_moi']);
+// $routes->post('/khach-hang/them-moi', [\App\Controllers\Admin\KhachhangController::class, 'addNewCustomer'], ['as' => 'khachhang.them_moi']);
 
 // Sửa khách hàng đã chọn
-$routes->get('/khach-hang/cap-nhat/show', [\App\Controllers\Admin\KhachhangController::class, 'showUpdateCustomer'], ['as' => 'khachhang.show_capnhat']);
-$routes->post('/khach-hang/cap-nhat/xu-ly', [\App\Controllers\Admin\KhachhangController::class, 'updateCustomer'], ['as' => 'khachhang.xuly_capnhat']);
+// $routes->get('/khach-hang/cap-nhat/show', [\App\Controllers\Admin\KhachhangController::class, 'showUpdateCustomer'], ['as' => 'khachhang.show_capnhat']);
+// $routes->post('/khach-hang/cap-nhat/xu-ly', [\App\Controllers\Admin\KhachhangController::class, 'updateCustomer'], ['as' => 'khachhang.xuly_capnhat']);
 
 // Xoá khách hàng đã chọn
-$routes->get('/khach-hang/xoa', [\App\Controllers\Admin\KhachhangController::class, 'deleteCustomer'], ['as' => 'khachhang.xoa']);
+// $routes->get('/khach-hang/xoa', [\App\Controllers\Admin\KhachhangController::class, 'deleteCustomer'], ['as' => 'khachhang.xoa']);
 
 // ====================================================================
 /*

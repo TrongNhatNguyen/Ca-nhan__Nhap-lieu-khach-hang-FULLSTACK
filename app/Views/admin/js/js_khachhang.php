@@ -272,9 +272,9 @@
 
                 // Lấy DL Response để làm nội dung tbody mới
                 var html = '';
-                var khachhangs = response.khachhangs;
-                if (khachhangs.length > 0) {
-                    $.each(khachhangs, function(index, khachhang) {
+                var dsKhachhangs = response.dsKhachhangs;
+                if (dsKhachhangs.length > 0) {
+                    $.each(dsKhachhangs, function(index, khachhang) {
                         html += `
                             <tr id="${khachhang.id}">
                                 <td>${khachhang.stt}</td>
@@ -296,7 +296,7 @@
                 tableBody.append(html);
 
                 // Cập nhật paginate:
-                $('.paginate-link-container').html(response.pager_links);
+                $('.paginate-link-container').html(response.pager);
 
                 /// HIGHLIGHT HÀNG DL <tr> ĐƯỢC THAO TÁC:
                 var highlightRow = '';

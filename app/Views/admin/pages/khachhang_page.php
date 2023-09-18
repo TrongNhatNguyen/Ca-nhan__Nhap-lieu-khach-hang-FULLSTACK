@@ -79,8 +79,8 @@
                     <tbody>
 
                         <!-- bắt đầu câu điều kiện -->
-                        <?php if (!empty($khachhangs)) : ?>
-                            <?php foreach ($khachhangs as $khachhang) : ?>
+                        <?php if (!empty($dsKhachhangs)) : ?>
+                            <?php foreach ($dsKhachhangs as $khachhang) : ?>
                                 <tr id="<?php echo $khachhang['id'] ?>">
                                     <td><?php echo $khachhang['stt']; ?></td>
                                     <td><?php echo $khachhang['name']; ?></td>
@@ -107,8 +107,8 @@
                 </table>
                 <!-- pagination -->
                 <div class="paginate-link-container">
-                    <?php if (isset($pager_links)) : ?>
-                        <?php echo $pager_links ?>
+                    <?php if (isset($pager)) : ?>
+                        <?php echo $pager ?>
                     <?php endif; ?>
                 </div>
             </div>

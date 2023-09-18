@@ -25,7 +25,7 @@ class Pager extends BaseConfig
         'default_simple' => 'CodeIgniter\Pager\Views\default_simple',
         'default_head'   => 'CodeIgniter\Pager\Views\default_head',
         // Tự custom paginate html
-        'my_custom_pager' => 'App\Views\admin\paginates\my_pager_view'
+        'khachhang_pager' => 'App\Views\admin\paginates\khachhang_pager',
     ];
 
     /**
