@@ -18,7 +18,7 @@ ul.pagination li a {
 }
 
 ul.pagination a:hover {
-    background-color: #ffc46c;
+    background-color: #e0a141;
 }
 
 .pagination li.active a {

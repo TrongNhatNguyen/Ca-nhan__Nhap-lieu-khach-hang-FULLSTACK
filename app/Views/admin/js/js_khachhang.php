@@ -10,7 +10,7 @@
         $(document).on('click', '.btn-upd-act', function(event) {
 
             $.ajax({
-                url: "<?php echo base_url(route_to('khachhang.show_capnhat')); ?>",
+                url: "<?php echo base_url(route_to('admin.capnhat_khachhang')); ?>",
                 method: 'GET',
                 data: {
                     idKh: $(this).closest('tr').attr('id'), // lấy idKh từ <tr> chứa nó
@@ -25,7 +25,7 @@
                     // NẠP DL VÀO FORM HIỂN THỊ
                     var form = $('.form-khachhang');
                     form.siblings('h3').text('SỬA KHÁCH HÀNG #' + khachhang.id); // thay đổi tiêu đề h3 nằm cùng cấp vs form
-                    form.attr('action', '<?php echo base_url(route_to('khachhang.xuly_capnhat')); ?>');
+                    form.attr('action', '<?php echo base_url(route_to('admin.xuly_capnhat')); ?>');
                     form.attr('status', 'update');
                     form.find('input[name="id_kh"]').val(khachhang.id);
                     form.find('input[name="name"]').val(khachhang.name);
@@ -66,7 +66,7 @@
                 if (result.isConfirmed) {
 
                     $.ajax({
-                        url: "<?php echo base_url(route_to('khachhang.xoa')); ?>",
+                        url: "<?php echo base_url(route_to('admin.xoa_khachhang')); ?>",
                         method: 'GET',
                         data: {
                             idKh: $(this).closest('tr').attr('id'), // lấy idKh từ <tr> chứa nó
@@ -102,33 +102,43 @@
         });
 
         /* LẮNG NGHE SỰ KIỆN TÌM KIẾM Ở TABLE === */
+        // Handle search form submission
         $(document).on('submit', '.form-search', function(event) {
             event.preventDefault();
+            search();
+        });
 
-            formData = $(this).serialize();
-            formData += "&page=" + encodeURIComponent(pageValue);
 
-            // GỬI REQUEST AJAX:
+        /*-----------------------------------------------
+            HÀM XỬ LÝ TÌM KIẾM KHÁCH HÀNG (chỉ gọi)
+        ------------------------------------------------*/
+        function search(page = 1) {
+            let keywords = $('#search-input').val();
+            console.log('ở đây: ' + keywords);
             $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: formData,
-                dataType: 'json',
+                url: '<?= base_url(route_to('admin.timkiem_khachhang')) ?>',
+                type: 'GET',
+                data: {
+                    keywords: keywords,
+                    page: page
+                },
                 success: function(response) {
                     // Load lại table danh sách
                     table_khachhang_reload_event(response, 'search');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Đã xảy ra lỗi từ server.');
-                },
-                complete: function() {
-                    // Dừng loading sau khi xong xử lý
-                    setTimeout(function() {
-                        $('.khachhang-form-spinner').fadeOut();
-                    }, 1000);
+
+                    // Nếu chuyển page tiếp theo thì gọi lại hàm:
+                    $(document).on('click', '.pagination a.pager-link', function(e) {
+                        e.preventDefault();
+
+                        // lấy url thẻ a -> lấy &page đang chọn:
+                        let href = $(this).attr('href');
+                        let page = getParameterByName('page', href);
+
+                        search(page);
+                    });
                 }
             });
-        });
+        }
 
 
         /*-----------------------------------------------
@@ -199,7 +209,7 @@
 
                                 if (form.attr('status') === 'update') {
                                     form.siblings('h3').text('THÊM KHÁCH HÀNG MỚI'); // thay đổi tiêu đề h3 nằm cùng cấp vs form
-                                    form.attr('action', '<?= base_url() . route_to('khachhang.them_moi') ?>');
+                                    form.attr('action', '<?= base_url() . route_to('admin.themmoi_khachhang') ?>');
                                     form.attr('status', 'add');
                                     form.find('input[type="submit"]').val('Thêm mới');
                                     table_khachhang_reload_event(response, 'update', form.find('[name="id_kh"]').val());

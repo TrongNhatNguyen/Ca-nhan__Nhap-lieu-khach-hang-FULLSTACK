@@ -21,6 +21,8 @@ class Filters extends BaseConfig
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
+        // ------------------------------------:
+        'admin_auth' => \App\Filters\AdminAuthFilter::class, // (1) đăng kí xác thực đăng nhập ở đây
     ];
 
     /**
@@ -29,9 +31,8 @@ class Filters extends BaseConfig
      */
     public array $globals = [
         'before' => [
-            // 'honeypot',
-            // 'csrf',
-            // 'invalidchars',
+            // ------------------------------------:
+            'admin_auth' => ['except' => ['admin/dang-nhap', 'admin/dang-xuat']], // (2) đăng kí xác thực đăng nhập ở đây
         ],
         'after' => [
             'toolbar',

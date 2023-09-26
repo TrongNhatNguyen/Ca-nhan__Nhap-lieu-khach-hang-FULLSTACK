@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\Admin\AdminModel;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\CLIRequest;
 use CodeIgniter\HTTP\IncomingRequest;
@@ -51,8 +52,10 @@ abstract class BaseController extends Controller
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
+        //===========================================================================
+        // TRUYỀN CÁC BIẾN MÀ Ở MỌI TRANG ĐỀU CẦN, VÍ DỤ (header, footer, userInfo,..)
 
-        // E.g.: $this->session = \Config\Services::session();
+        helper('admin_helper'); // lấy thông tin admin đang đăng nhập hiển thị ở header
+
     }
 }

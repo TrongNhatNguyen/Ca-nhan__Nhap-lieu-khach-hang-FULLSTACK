@@ -25,7 +25,7 @@ class CustomRules extends Rules
         }
 
         // $error có thể bỏ:
-        // $error = 'Sorry. That field is not valid.';
+        $error = 'Sorry. That field is not valid.';
         return false;
     }
 }

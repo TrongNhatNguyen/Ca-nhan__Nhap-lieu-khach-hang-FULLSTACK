@@ -102,11 +102,13 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+/* khung form login */
 .container .form-login {
     width: 40rem;
-    background-color: #eaeded;
+    background-color: #191e29;
     padding: 2rem;
-    border: 2px solid #4e8cff;
+    border: 2px solid #3e202b;
     border-radius: 2rem;
     box-shadow: var(--box-shadow);
 
@@ -125,6 +127,7 @@ body {
     font-size: 1.7rem;
     border: 2px solid #ccc;
     border-radius: 10px;
+    text-transform: none;
 }
 .form-login .form-group input:focus {
     outline: none;
@@ -137,6 +140,11 @@ body {
     right: 1rem;
     display: inline-block;
     cursor: pointer;
+}
+
+/* Tiêu đề */
+.form-login h2 {
+    color: #436fc1;
 }
 
 /* nút login */

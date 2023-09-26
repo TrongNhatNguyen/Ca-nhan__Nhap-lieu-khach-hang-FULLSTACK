@@ -9,12 +9,12 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\Admin\KhachhangModel;
 use CodeIgniter\Config\Services;
-use CodeIgniter\I18n\Time;
 
 class KhachhangController extends BaseController
 {
     protected $services;
     protected $time;
+    protected $session;
     protected $khachhangModel;
 
     public function __construct()
@@ -22,11 +22,15 @@ class KhachhangController extends BaseController
         // Chuyển hướng về view (extend, section,..)
         $this->services = new Services();
 
-        // Nạp hàm lấy hoặc format thời gian:
-        $this->time = new Time();
+        // Khởi tạo hàm lấy, format thời gian:
+        $this->time = \CodeIgniter\I18n\Time::now('Asia/Ho_Chi_Minh');
 
         // Nạp dl vào database cần tạo Model:
         $this->khachhangModel = new KhachhangModel();
+
+        // Khởi tạo lưu trữ Session:
+        $this->session = \Config\Services::session();
+        $this->session->set(['page' => 1]); // mặc định giá trị page
     }
 
 
@@ -51,32 +55,30 @@ class KhachhangController extends BaseController
      */
     public function timkiemKhachhang()
     {
-        $keywords    = $this->request->getVar('search');
-        $fieldSearch = $this->determineSearchField($keywords);
-
-        $page = intval($this->request->getGet('page_search', FILTER_VALIDATE_INT))
-            ?: intval($this->request->getPost('page_search', FILTER_VALIDATE_INT));
-        $page = max(1, $page);
-
-        $data  = [];
-        $limit = 5;
+        $keywords = $this->request->getVar('keywords');
+        $page     = $this->request->getVar('page') ?? 1;
+        $limit    = 5;
         $dieukien = []; // $dieukien = ['status' => 'active'];
-        $search = $fieldSearch ? [$fieldSearch, $keywords] : [];
 
+        // lấy field tìm kiếm tương ứng bằng keyword:
+        $fieldSearch = $this->determineSearchField($keywords);
+        $search      = $fieldSearch ? [$fieldSearch, $keywords] : []; // phải tạo biến $search vì query->like() yêu cầu tham số chính xác
+
+        // Câu Query:
         $query = $this->khachhangModel->where($dieukien);
         if ($fieldSearch) {
             $query = $query->like($search[0], $search[1]);
         }
 
-        $dsKhachhangs = $query->paginate($limit);
-        $total        = $this->khachhangModel->countTotal($dieukien, $search);
+        $total        = $query->countAllResults(false);
+        $dsKhachhangs = $query->paginate(perPage: $limit, page: $page);
 
-        $data = [
-            'dsKhachhangs' => $this->napSttDateTime($dsKhachhangs, $total, $page),
+        $resData = [
+            'dsKhachhangs' => $this->nap_stt_date_time($dsKhachhangs, $total, $page, $limit),
             'pager'        => $query->pager->links(template: 'khachhang_pager')
         ];
 
-        return $this->response->setJSON($data, 200);
+        return $this->response->setJSON($resData);
     }
 
 
@@ -91,6 +93,7 @@ class KhachhangController extends BaseController
             'phone'  => $this->request->getPost('phone'),
             'points' => $this->request->getPost('points'),
             'status' => 'active',
+            'created_at' => $this->time->toLocalizedString()
         ];
 
         $result = $this->khachhangModel->themMoiKhachHang($data);
@@ -103,7 +106,7 @@ class KhachhangController extends BaseController
 
         $resData += $this->dsPhanTrang(page: 1);
 
-        return $this->response->setJSON($resData, 200);
+        return $this->response->setJSON($resData);
     }
 
     /**-------------------------------
@@ -134,6 +137,7 @@ class KhachhangController extends BaseController
             'name'   => $this->request->getPost('name'),
             'phone'  => $this->request->getPost('phone'),
             'points' => $this->request->getPost('points'),
+            'updated_at' => $this->time->toLocalizedString()
         ];
 
         $result = $this->khachhangModel->capNhatKhachHang($id, $data);
@@ -178,10 +182,15 @@ class KhachhangController extends BaseController
     /**------------------------------
      *  Hàm Phân trang ds khách hàng
      */
-    public function dsPhanTrang($page, $limit = 5, $fields = '*', $dieukien = [], $orderBy = 'id DESC')
+    public function dsPhanTrang($page = null, $limit = 5, $fields = '*', $dieukien = [], $orderBy = 'id DESC')
     {
-        $page = max(1, $page);
-        $data  = [];
+        // kiểm tra xem có lưu giữ giá trị page trong session:
+        if ($page && $page > 0) {
+            $this->session->set('page', max(1, $page));
+        }
+
+        $page = $this->session->get('page');
+        $data = [];
         // $dieukien += ['status' => 'active'];
 
         $total        = $this->khachhangModel->countTotal($dieukien);
@@ -189,7 +198,7 @@ class KhachhangController extends BaseController
             ->where($dieukien)->orderBy($orderBy)->paginate(perPage: $limit, page: $page);
 
         $data = [
-            'dsKhachhangs' => $this->napSttDateTime($dsKhachhangs, $total, $page),
+            'dsKhachhangs' => $this->nap_stt_date_time($dsKhachhangs, $total, $page, $limit),
             'pager'        => $this->khachhangModel->pager->links(template: 'khachhang_pager')
         ];
 
@@ -200,7 +209,7 @@ class KhachhangController extends BaseController
     /**------------------------------
      *  Hàm nạp thêm STT, Date, Time
      */
-    public function napSttDateTime(array $dsKhachhangs, int $total, int $page = 1, int $limit = 5): array
+    public function nap_stt_date_time(array $dsKhachhangs, int $total, int $page, int $limit): array
     {
         // nếu không có bản ghi nào hoặc tổng số bản ghi là 0, trả về danh sách rỗng
         if (!$dsKhachhangs || $total <= 0) {
@@ -232,8 +241,6 @@ class KhachhangController extends BaseController
 
         return $dsKhachhangs;
     }
-
-
 
 
     /**---------------------------------------------

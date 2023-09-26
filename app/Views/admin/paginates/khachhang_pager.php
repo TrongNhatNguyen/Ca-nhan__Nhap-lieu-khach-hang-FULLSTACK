@@ -15,12 +15,12 @@ $baseUrl = ''; // base_url(route_to('khachhang'));
         <!-- nút Previous -->
         <?php if ($pager->hasPrevious()) : ?>
             <li>
-                <a href="<?= $pager->getFirst() ?>" aria-label="<?= lang('Pager.first') ?>">
+                <a class="pager-link" href="<?= $pager->getFirst() ?>" aria-label="<?= lang('Pager.first') ?>">
                     <span aria-hidden="true"><?= lang('Pager.first') ?></span>
                 </a>
             </li>
             <li>
-                <a href="<?= $pager->getPrevious() ?>" aria-label="<?= lang('Pager.previous') ?>">
+                <a class="pager-link" href="<?= $pager->getPrevious() ?>" aria-label="<?= lang('Pager.previous') ?>">
                     <span aria-hidden="true"><?= lang('Pager.previous') ?></span>
                 </a>
             </li>
@@ -30,9 +30,9 @@ $baseUrl = ''; // base_url(route_to('khachhang'));
         <?php foreach ($pager->links() as $link) : ?>
             <li <?= $link['active'] ? 'class="active"' : '' ?>>
                 <?php if (!empty($baseUrl)) : ?>
-                    <a href="<?= $baseUrl ?>?page=<?= $link['title'] ?>"><?= $link['title'] ?></a>
+                    <a class="pager-link" href="<?= $baseUrl ?>?page=<?= $link['title'] ?>"><?= $link['title'] ?></a>
                 <?php else : ?>
-                    <a href="<?= $link['uri'] ?>"><?= $link['title'] ?></a>
+                    <a class="pager-link" href="<?= $link['uri'] ?>"><?= $link['title'] ?></a>
                 <?php endif; ?>
             </li>
         <?php endforeach ?>
@@ -40,12 +40,12 @@ $baseUrl = ''; // base_url(route_to('khachhang'));
         <!-- Nút Next -->
         <?php if ($pager->hasNext()) : ?>
             <li>
-                <a href="<?= $pager->getNext() ?>" aria-label="<?= lang('Pager.next') ?>">
+                <a class="pager-link" href="<?= $pager->getNext() ?>" aria-label="<?= lang('Pager.next') ?>">
                     <span aria-hidden="true"><?= lang('Pager.next') ?></span>
                 </a>
             </li>
             <li>
-                <a href="<?= $pager->getLast() ?>" aria-label="<?= lang('Pager.last') ?>">
+                <a class="pager-link" href="<?= $pager->getLast() ?>" aria-label="<?= lang('Pager.last') ?>">
                     <span aria-hidden="true"><?= lang('Pager.last') ?></span>
                 </a>
             </li>

@@ -24,7 +24,7 @@
         <div class="left-box">
             <div class="content">
                 <h3 class="title">Thêm Khách hàng mới</h3>
-                <form class="form-khachhang" status="add" action="<?php echo base_url(route_to('khachhang.them_moi')); ?>" method="POST">
+                <form class="form-khachhang" status="add" action="<?php echo base_url(route_to('admin.themmoi_khachhang')); ?>" method="POST">
                     <div class="form-group">
                         <label for="name">Tên khách hàng</label>
                         <input type="text" name="name" id="name" class="form-control" placeholder="Nhập tên.." />
@@ -62,7 +62,7 @@
         <!-- khung phải -->
         <div class="right-box">
             <div class="content">
-                <form class="form-search" action="<?php echo base_url(route_to('khachhang.tim_kiem')); ?>" method="POST">
+                <form class="form-search" method="GET">
                     <input type="search" name="search" id="search-input" placeholder="Tìm kiếm.." autofocus />
                     <button type="submit" for="search-input" class="fas fa-magnifying-glass"></button>
                 </form>

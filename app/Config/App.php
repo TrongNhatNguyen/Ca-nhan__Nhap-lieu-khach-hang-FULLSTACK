@@ -171,7 +171,7 @@ class App extends BaseConfig
      *
      * The number of SECONDS you want the session to last.
      * Setting to 0 (zero) means expire when the browser is closed.
-     *
+
      * @deprecated use Config\Session::$expiration instead.
      */
     public int $sessionExpiration = 7200;

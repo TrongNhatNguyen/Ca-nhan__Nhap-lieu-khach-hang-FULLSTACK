@@ -1,5 +1,13 @@
 <?php
 
+/**
+ *  Cấu hình Model khách hàng để nạp dl vào DB,
+ *  Vào `app/Config/Database.php` để kết nối với CSDL localhost
+ * 
+ *  Quy tắc tự viết trong: `App\CustomValidators\Models\CustomRules.php`
+ *  và đăng kí nó ở: `App\Config\Validation.php` -> biến $ruleSets
+ */
+
 namespace App\Models\Admin;
 
 use CodeIgniter\Model;
@@ -15,13 +23,34 @@ class KhachhangModel extends Model
 
     protected $allowedFields = ['name', 'phone', 'points', 'status', 'created_at', 'updated_at'];  // Các trường bạn muốn cho phép thao tác
 
-    protected $useTimestamps = true;      // Bật timestamps
+    // Ngày giờ:
+    protected $useTimestamps = false; // true thì tự động nạp giá trị vào db
+    protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
-    protected $validationRules    = [];   // Các quy tắc xác thực cho việc thêm/sửa
-    protected $validationMessages = [];   // Thông báo tùy chỉnh cho xác thực
     protected $skipValidation     = false; // Có bỏ qua quá trình xác thực hay không
+    protected $validationRules    = [      // Các quy tắc xác thực cho việc thêm/sửa
+        'name'     => 'required|rule_name_unicode|min_length[3]|max_length[20]',
+        'phone'    => 'required|numeric|min_length[9]|max_length[12]',
+        'points'   => 'required|numeric',
+    ];
+    protected $validationMessages = [      // Thông báo tùy chỉnh cho xác thực
+        'name' => [
+            'required'            => 'Sorry. That field is required.',
+            'rule_name_unicode'   => 'Sorry. That field is not valid.',
+            'min_length'          => 'Sorry. That field is not valid.',
+        ],
+        'phone' => [
+            'required'            => 'Sorry. That field is required.',
+            'numeric'             => 'Sorry. That field is not valid.',
+            'min_length'          => 'Sorry. That field is not valid.',
+        ],
+        'points' => [
+            'required'            => 'Sorry. That field is required.',
+            'numeric'             => 'Sorry. That field is not valid.',
+        ],
+    ];
 
     // =================================================================
     protected $validation;
@@ -60,12 +89,15 @@ class KhachhangModel extends Model
     {
         $this->select('id')->where($where);
 
-        if (!empty($search) && is_array($search) && count($search) === 2) {
+        if (isset($search[0], $search[1])) {
             $this->like($search[0], $search[1]);
+        } elseif ($search) {
+            throw new \InvalidArgumentException('chưa đảm bảo đủ 2 giá trị trong Search.');
         }
 
         return $this->countAllResults();
     }
+
 
 
     /**------------------------------
@@ -73,6 +105,22 @@ class KhachhangModel extends Model
      */
     public function themMoiKhachHang($data)
     {
+        // Nạp các Quy Tắc & thông báo đã được khai báo ở bên trên:
+        $this->validation->setRules($this->validationRules, $this->validationMessages);
+
+        // Kiểm tra các dữ liệu truyền vào có đúng Quy Tắc:
+        $isValid = $this->validation->run([
+            'name'   => $data['name'],
+            'phone'  => $data['phone'],
+            'points' => $data['points'],
+        ]);
+
+        // Nếu dữ liệu vi phạm, trả về thông báo lỗi:
+        if (!$isValid) {
+            $errors = $this->validation->getErrors();
+            throw new \InvalidArgumentException($errors[1]);
+        }
+
         return $this->insert($data);
     }
 

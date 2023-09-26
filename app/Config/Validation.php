@@ -2,15 +2,14 @@
 
 namespace Config;
 
-// Thêm dòng này để khai báo đường dẫn quy tắc đăng ký:
-use App\CustomValidators\CustomRules;
-
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Validation\StrictRules\CreditCardRules;
 use CodeIgniter\Validation\StrictRules\FileRules;
 use CodeIgniter\Validation\StrictRules\FormatRules;
 use CodeIgniter\Validation\StrictRules\Rules;
 
+// Thêm dòng này để khai báo đường dẫn quy tắc đăng ký:
+use App\CustomValidators\Models\CustomRules;
 
 class Validation extends BaseConfig
 {

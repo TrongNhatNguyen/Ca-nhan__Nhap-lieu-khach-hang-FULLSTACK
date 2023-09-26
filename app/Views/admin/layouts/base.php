@@ -7,6 +7,8 @@
  *  ở index dều phải được khai báo vị trí hiển thị renderSection ở đây.
  */
 
+$admin_public_dir = base_url() . '/public/admin';
+
 ?>
 
 <html lang="en">
@@ -17,20 +19,20 @@
     <title>Vlance Nhập Liệu KH</title>
 
     <!-- CSS CDN Plugin files -->
-    <link href="<?= base_url(); ?>/public/admin/icon/font-awesome-6.4.2-pro-main/css/all.css" rel="stylesheet" />
+    <link href="<?php echo $admin_public_dir; ?>/icon/font-awesome-6.4.2-pro-main/css/all.css" rel="stylesheet" />
 
     <!-- Hộp thoại thông báo (SweetAlerts) đẹp mắt -->
-    <link href="<?= base_url(); ?>/public/admin/sweet-alert2/sweetalert2.min.css" rel="stylesheet" />
-    <link href="<?= base_url(); ?>/public/admin/sweet-alert2/style-sweetalert2.css" rel="stylesheet" />
+    <link href="<?php echo $admin_public_dir; ?>/sweet-alert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="<?php echo $admin_public_dir; ?>/sweet-alert2/style-sweetalert2.css" rel="stylesheet" />
 
     <!-- CSS CUSTOM -->
-    <link href="<?= base_url(); ?>/public/admin/css/style-index.css" rel="stylesheet" />
+    <link href="<?php echo $admin_public_dir; ?>/css/style-index.css" rel="stylesheet" />
 
     <!-- Hiệu ứng loading -->
-    <link href="<?= base_url(); ?>/public/admin/css/spinner-loading.css" rel="stylesheet" />
+    <link href="<?php echo $admin_public_dir; ?>/css/spinner-loading.css" rel="stylesheet" />
 
     <!-- Phân trang Paginate links -->
-    <link href="<?= base_url(); ?>/public/admin/css/paginate.css" rel="stylesheet" />
+    <link href="<?php echo $admin_public_dir; ?>/css/paginate.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -48,13 +50,13 @@
 
     <!-- ============================================= -->
     <!-- JS PLUGIN CDN MẶC ĐỊNH -->
-    <script src="<?= base_url(); ?>/public/admin/js-plugin/jquery-3.6.1.min.js"></script>
+    <script src="<?php echo $admin_public_dir; ?>/js-plugin/jquery-3.6.1.min.js"></script>
 
     <!-- Quy tắc xác thực Form input -->
-    <script src="<?= base_url(); ?>/public/admin/js-plugin/jquery.validate.min.js"></script>
+    <script src="<?php echo $admin_public_dir; ?>/js-plugin/jquery.validate.min.js"></script>
 
     <!-- Hộp thoại thông báo (SweetAlerts) đẹp mắt -->
-    <script src="<?= base_url(); ?>/public/admin/sweet-alert2/sweetalert2.min.js"></script>
+    <script src="<?php echo $admin_public_dir; ?>/sweet-alert2/sweetalert2.min.js"></script>
 
     <!-- Nếu trang đó có file JS riêng thì nhận khai báo ở dưới đây  -->
     <?= $this->renderSection('custom_js_page') ?>

@@ -29,25 +29,35 @@ $routes->set404Override();
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
+
+/// === ĐƯỜNG DẪN URL CHO CLIENT:
 $routes->get('/welcome', 'Home::index');
 
-// === ĐƯỜNG DẪN URL CHO ADMIN:
-// Trang index
-$routes->get('/khach-hang', [\App\Controllers\Admin\KhachhangController::class, 'index'], ['as' => 'khachhang']);
-$routes->addRedirect('/', '/khach-hang');
 
-// Tìm kiếm khách hàng:
-$routes->post('/khach-hang/tim-kiem', [\App\Controllers\Admin\KhachhangController::class, 'timkiemKhachhang'], ['as' => 'khachhang.tim_kiem']);
+/// === ĐƯỜNG DẪN URL CHO ADMIN:
+$routes->addRedirect('/admin', 'admin/dang-nhap'); // `http://nhaplieu-codeigniter.test/admin`
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
+    // phần đăng nhập, đăng xuất:
+    $routes->match(['get', 'post'], 'dang-nhap', 'AuthController::login', ['as' => 'admin.dangnhap']);
+    $routes->get('dang-xuat', 'AuthController::logout', ['as' => 'admin.dangxuat']);
 
-// Thêm khách hàng mới
-$routes->post('/khach-hang/them-moi', [\App\Controllers\Admin\KhachhangController::class, 'themMoi'], ['as' => 'khachhang.them_moi']);
+    // Trang index
+    $routes->get('khach-hang', 'KhachhangController::index', ['as' => 'admin.khachhang']);
 
-// Sửa khách hàng đã chọn
-$routes->get('/khach-hang/cap-nhat/show', [\App\Controllers\Admin\KhachhangController::class, 'showCapNhat'], ['as' => 'khachhang.show_capnhat']);
-$routes->post('/khach-hang/cap-nhat/xu-ly', [\App\Controllers\Admin\KhachhangController::class, 'xulyCapNhat'], ['as' => 'khachhang.xuly_capnhat']);
+    // Tìm kiếm khách hàng:
+    $routes->match(['get', 'post'], 'khach-hang/tim-kiem', 'KhachhangController::timkiemKhachhang', ['as' => 'admin.timkiem_khachhang']);
 
-// Xoá khách hàng đã chọn
-$routes->get('/khach-hang/xoa', [\App\Controllers\Admin\KhachhangController::class, 'xoa'], ['as' => 'khachhang.xoa']);
+    // Thêm khách hàng mới
+    $routes->post('khach-hang/them-moi', 'KhachhangController::themMoi', ['as' => 'admin.themmoi_khachhang']);
+
+    // Sửa khách hàng đã chọn
+    $routes->get('khach-hang/cap-nhat/show', 'KhachhangController::showCapNhat', ['as' => 'admin.capnhat_khachhang']);
+    $routes->post('khach-hang/cap-nhat/xu-ly', 'KhachhangController::xulyCapNhat', ['as' => 'admin.xuly_capnhat']);
+
+    // Xoá khách hàng đã chọn
+    $routes->get('khach-hang/xoa', 'KhachhangController::xoa', ['as' => 'admin.xoa_khachhang']);
+});
+
 
 // ====================================================================
 /*
